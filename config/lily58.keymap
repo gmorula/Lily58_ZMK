@@ -10,61 +10,108 @@
 #include <dt-bindings/zmk/ext_power.h>
 
 / {
+    behaviors {
+        td_caps: tap_dance_caps {
+            compatible = "zmk,behavior-tap-dance";
+            label = "TAP_DANCE_CAPS";
+            #binding-cells = <0>;
+            tapping-term-ms = <200>;
+            bindings = <&kp RSHIFT>, <&kp CAPSLOCK>;
+        };
+
+        td_raise: tap_dance_raise {
+            compatible = "zmk,behavior-tap-dance";
+            label = "TAP_DANCE_RAISE";
+            #binding-cells = <0>;
+            tapping-term-ms = <200>;
+            bindings = <&mo 2>, <&tog 2>;
+        };
+        td_lower: tap_dance_lower {
+            compatible = "zmk,behavior-tap-dance";
+            label = "TAP_DANCE_LOWER";
+            #binding-cells = <0>;
+            tapping-term-ms = <200>;
+            bindings = <&mo 1>, <&tog 1>;
+        };
+    };
+
+    conditional_layers {
+        compatible = "zmk,conditional-layers";
+        tri_layer {
+            if-layers = <1 2>;
+            then-layer = <3>;
+        };
+    };
+
 	keymap {
 		compatible = "zmk,keymap";
 
 		default_layer {
 // ------------------------------------------------------------------------------------------------------------
-// |  ESC  |  1  |  2  |  3   |  4   |  5   |                   |  6   |  7    |  8    |  9   |   0   |   `   |
-// |  TAB  |  Q  |  W  |  E   |  R   |  T   |                   |  Y   |  U    |  I    |  O   |   P   |   -   |
+// |  ESC  |  1  |  2  |  3   |  4   |  5   |                   |  6   |  7    |  8    |  9   |   0   | BSPC  |
+// |  TAB  |  Q  |  W  |  E   |  R   |  T   |                   |  Y   |  U    |  I    |  O   |   P   |   \   |
 // |  CTRL |  A  |  S  |  D   |  F   |  G   |                   |  H   |  J    |  K    |  L   |   ;   |   '   |
-// | SHIFT |  Z  |  X  |  C   |  V   |  B   |   "["  |  |  "]"  |  N   |  M    |  ,    |  .   |   /   | SHIFT |
-//                     | ALT  | GUI  | LOWER|  SPACE |  | ENTER | RAISE| BSPC  | GUI   |
+// | SHIFT |  Z  |  X  |  C   |  V   |  B   |   "["  |  |  "]"  |  N   |  M    |  ,    |  .   |   /   | SHIFT/CAPS |
+//                     | GUI  | LALT | LOWER|  SPACE |  | ENTER | RAISE| MENU  | RALT   |
 			bindings = <
-&kp ESC   &kp N1 &kp N2 &kp N3   &kp N4   &kp N5                     &kp N6 &kp N7   &kp N8    &kp N9  &kp N0   &kp GRAVE
-&kp TAB   &kp Q  &kp W  &kp E    &kp R    &kp T                      &kp Y  &kp U    &kp I     &kp O   &kp P    &kp MINUS
+&kp ESC   &kp N1 &kp N2 &kp N3   &kp N4   &kp N5                     &kp N6 &kp N7   &kp N8    &kp N9  &kp N0   &kp BSPC
+&kp TAB   &kp Q  &kp W  &kp E    &kp R    &kp T                      &kp Y  &kp U    &kp I     &kp O   &kp P    &kp BSLH
 &kp LCTRL &kp A  &kp S  &kp D    &kp F    &kp G                      &kp H  &kp J    &kp K     &kp L   &kp SEMI &kp SQT
-&kp LSHFT &kp Z  &kp X  &kp C    &kp V    &kp B  &kp LBKT   &kp RBKT &kp N  &kp M    &kp COMMA &kp DOT &kp FSLH &kp RSHFT
-                        &kp LALT &kp LGUI &mo 1  &kp SPACE  &kp RET  &mo 2  &kp BSPC &kp RGUI
+&kp LSHFT &kp Z  &kp X  &kp C    &kp V    &kp B  &kp LBKT   &kp RBKT &kp N  &kp M    &kp COMMA &kp DOT &kp FSLH &td_caps
+                        &kp LGUI &kp LALT &mo 1  &kp SPACE  &kp RET  &mo 2  &kp K_APP &kp RALT
 			>;
 
-			sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN>;
 		};
 
 		lower_layer {
 // ------------------------------------------------------------------------------------------------------------
-// | BTCLR | BT1 | BT2 |  BT3 |  BT4 |  BT5 |                   |      |       |       |      |       |       |
-// |  F1   |  F2 |  F3 |  F4  |  F5  |  F6  |                   |  F7  |  F8   |  F9   |  F10 |  F11  |  F12  |
-// |   `   |  !  |  @  |  #   |  $   |  %   |                   |  ^   |  &    |  *    |  (   |   )   |   ~   |
-// |       |     |     |      |      |      |        |  |       |      |  _    |  +    |  {   |   }   |  "|"  |
-//                     |      |      |      |        |  |       |      |       |       |
+// |   ~   |      |      |      |      | BRI+ |                      | PSCR |PAUSE |      |   _  |   +  | DEL  |
+// |       |      |      |CTRL+E|      | BRI- |                      | Home |  Up  | PgUp |  INS |      |      |
+// |       |CTRL+A| SAVE |      |      | VOl+                        | Left | Down | Right|      |      |      |
+// |       | UNDO |      |CTRL+C|CTRL+V| VOL- | MUTE  |      |       |  End |      | PgDn |      |      |RShift/CAPS|
+//                       | LGUI | LAlt |LOWER | Space /      \Enter  |RAISE | Menu | RAlt |
 			bindings = <
-&bt BT_CLR &bt BT_SEL 0     &bt BT_SEL 1      &bt BT_SEL 2      &bt BT_SEL 3 &bt BT_SEL 4                 &trans    &trans    &trans          &trans    &trans    &trans
-&kp F1     &kp F2           &kp F3            &kp F4            &kp F5       &kp F6                       &kp F7    &kp F8    &kp F9          &kp F10   &kp F11   &kp F12
-&kp GRAVE  &kp EXCL         &kp AT            &kp HASH          &kp DOLLAR   &kp PRCNT                    &kp CARET &kp AMPS  &kp KP_MULTIPLY &kp LPAR  &kp RPAR  &kp TILDE
-&trans     &ext_power EP_ON &ext_power EP_OFF &ext_power EP_TOG &trans       &trans    &trans   &trans    &trans    &kp MINUS &kp KP_PLUS     &kp LBRC  &kp RBRC  &kp PIPE
-                                              &trans            &trans       &trans    &trans   &trans    &trans    &trans    &trans
+&kp TILDE  &trans         &trans         &trans     &trans     &kp C_BRI_UP                        &kp PSCRN   &kp PAUSE_BREAK  &trans     &kp RS(KP_MINUS) &kp RS(EQUAL)  &kp DEL
+&trans     &trans         &trans         &kp LC(E)  &trans     &kp C_BRI_DN                        &kp HOME    &kp UP           &kp PG_UP  &kp INS          &trans         &trans
+&trans     &kp LC(A)      &kp C_AC_SAVE  &trans     &trans     &kp C_VOL_UP                        &kp LEFT    &kp DOWN         &kp RIGHT  &trans           &trans         &trans
+&trans     &kp C_AC_UNDO  &kp LC(S)      &trans     &trans     &kp C_VOL_DN  &kp C_MUTE   &trans   &kp END     &trans           &kp PG_DN  &trans           &trans         &td_caps
+                                         &kp LGUI    &kp LALT  &mo 1         &kp SPACE    &kp RET  &mo 2       &kp K_APP        &kp RALT
 			>;
 
-			sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN>;
 		};
 
-		raise_layer {
+		raise_layer {	
 // ------------------------------------------------------------------------------------------------------------
-// |       |     |     |      |      |      |                   |      |       |       |      |       |       |
-// |   `   |  1  |  2  |  3   |  4   |  5   |                   |  6   |   7   |   8   |  9   |   0   |       |
-// |   F1  |  F2 |  F3 |  F4  |  F5  |  F6  |                   |      |   <-  |   v   |  ^   |  ->   |       |
-// |   F7  |  F8 |  F9 |  F10 |  F11 |  F12 |        |  |       |  +   |   -   |   =   |  [   |   ]   |   \   |
-//                     |      |      |      |        |  |       |      |       |       |
+// |   `   |      |      |      |      |      |                      |      |      |      |   -  |  =   | DEL  |
+// |       |  F1  |  F2  |  F3  |  F4  |  F5  |                      |  F6  |  F7  |  F8  |  F9  | F10  |      |
+// |       |  F11 |  F12 |      |      |      |                      |      |      |      |      |      |      |
+// |       |      |      |      |      |      |       |      |       |      |      |      |      |      |RShift/CAPS|
+//                       | LGUI | LAlt |LOWER | Space /      \ Enter |RAISE | Menu | RAlt |
 			bindings = <
-&trans    &trans &trans &trans  &trans  &trans                       &trans      &trans    &trans    &trans   &trans    &trans
-&kp GRAVE &kp N1 &kp N2 &kp N3  &kp N4  &kp N5                       &kp N6      &kp N7    &kp N8    &kp N9   &kp N0    &trans
-&kp F1    &kp F2 &kp F3 &kp F4  &kp F5  &kp F6                       &trans      &kp LEFT  &kp DOWN  &kp UP   &kp RIGHT &trans
-&kp F7    &kp F8 &kp F9 &kp F10 &kp F11 &kp F12   &trans   &trans    &kp KP_PLUS &kp MINUS &kp EQUAL &kp LBKT &kp RBKT  &kp BSLH
-                        &trans  &trans  &trans    &trans   &trans    &trans      &trans    &trans
+&kp GRAVE &trans   &trans   &trans   &trans   &trans                       &trans   &trans    &trans   &kp KP_MINUS &kp EQUAL  &kp DEL
+&trans    &kp F1   &kp F2   &kp F3   &kp F4   &kp F5                       &kp F6   &kp F7    &kp F8   &kp F9       &kp F10    &trans
+&trans    &kp F11  &kp F12  &trans   &trans   &trans                       &trans   &trans    &trans   &trans       &trans     &trans
+&trans    &trans   &trans   &trans   &trans   &trans   &trans     &trans   &trans   &trans    &trans   &trans       &trans     &td_caps
+                            &kp LGUI &kp LALT &mo 1    &kp SPACE  &kp RET  &mo 2    &kp K_APP &kp RALT
 			>;
 
-			sensor-bindings = <&inc_dec_kp C_VOL_UP C_VOL_DN>;
+		};
+
+		adjust_layer {	
+// ------------------------------------------------------------------------------------------------------------
+// | BTCLR | BT1  | BT2  |  BT3 |  BT4 |  BT5 |                      |      |      |      |      |      | CTRL+ALT+DEL  |
+// |       |      |      |      |      |      |                      |      |      |      |      |      |      |
+// |       |      |      |      |      |      |                      |      |      |      |      |      |      |
+// |       | EP_ON|EP_OFF|EP_TOG|      |      |       |      |       |      |      |      |      |      |      |
+//                       | LGUI | LAlt |LOWER | Space /      \ Enter |RAISE | Menu | RAlt |
+			bindings = <
+&bt BT_CLR  &bt BT_SEL 0     &bt BT_SEL 1      &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4                      &none   &none     &none   &none &none  &kp LA(RC(DEL))
+&none       &none            &none             &none         &none         &none                             &none   &none     &none   &none &none  &none
+&none       &none            &none             &none         &none         &none                             &none   &none     &none   &none &none  &none
+&none       &ext_power EP_ON &ext_power EP_OFF &ext_power EP_TOG         &none         &none     &kp C_PWR    &C_SLEEP   &none   &none     &none   &none &none  &none
+                                        &kp LGUI      &kp LALT      &mo 1     &kp SPACE    &kp RET    &mo 2   &kp K_APP &kp RALT
+			>;
+
 		};
 	};
 };
